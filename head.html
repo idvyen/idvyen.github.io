@@ -12,11 +12,31 @@
         font-family: "Segoe UI", sans-serif;
     }
 
-    #tip {
+    #ui {
         position: fixed;
         top: 10px;
         left: 50%;
         transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    button {
+        padding: 6px 14px;
+        border-radius: 8px;
+        border: none;
+        background: #4a90e2;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #357abd;
+    }
+
+    #tip {
         opacity: 0.7;
         pointer-events: none;
     }
@@ -35,7 +55,11 @@
 </head>
 <body>
 
-<div id="tip">🖱️ 抓住小人拖動 → 放開丟出去</div>
+<div id="ui">
+    <div id="tip">🖱️ 抓住拖 → 放開丟</div>
+    <button id="center">回到中央</button>
+    <button id="reset">重新開始</button>
+</div>
 
 <!-- 🙂 小人 -->
 <svg id="person" viewBox="0 0 160 260">
@@ -52,29 +76,46 @@
 
 <script>
 const person = document.getElementById("person");
+const resetBtn = document.getElementById("reset");
+const centerBtn = document.getElementById("center");
 
-// 📍 位置
-let x = window.innerWidth / 2;
-let y = window.innerHeight / 2;
+// 位置與速度
+let x, y;
+let vx = 0, vy = 0;
 
-// 🧮 速度
-let vx = 0;
-let vy = 0;
-
-// 🖱️ 拖曳狀態
+// 拖曳
 let dragging = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
 
-// 初始位置
-person.style.left = x + "px";
-person.style.top = y + "px";
+// =======================
+// 共用：移到中央
+// =======================
+function moveToCenter() {
+    x = window.innerWidth / 2 - person.offsetWidth / 2;
+    y = window.innerHeight / 2 - person.offsetHeight / 2;
+    vx = 0;
+    vy = 0;
+    dragging = false;
+    person.style.left = x + "px";
+    person.style.top = y + "px";
+    person.style.transform = "none";
+}
+
+// 🔄 重新開始（目前等同於回中央＋清空）
+function resetPerson() {
+    moveToCenter();
+}
+
+centerBtn.addEventListener("click", moveToCenter);
+resetBtn.addEventListener("click", resetPerson);
+
+// 初始
+moveToCenter();
 
 // =======================
 // 滑鼠事件
 // =======================
-
-// 按下 → 抓住
 person.addEventListener("mousedown", e => {
     dragging = true;
     vx = 0;
@@ -83,7 +124,6 @@ person.addEventListener("mousedown", e => {
     lastMouseY = e.clientY;
 });
 
-// 拖動
 document.addEventListener("mousemove", e => {
     if (!dragging) return;
 
@@ -93,7 +133,6 @@ document.addEventListener("mousemove", e => {
     x += dx;
     y += dy;
 
-    // 記錄速度（放手時用）
     vx = dx;
     vy = dy;
 
@@ -104,28 +143,25 @@ document.addEventListener("mousemove", e => {
     person.style.top = y + "px";
 });
 
-// 放開 → 丟出去
 document.addEventListener("mouseup", () => {
     dragging = false;
 });
 
 // =======================
-// 物理更新（不卡牆核心）
+// 物理更新
 // =======================
 function update() {
     const w = person.offsetWidth;
     const h = person.offsetHeight;
 
     if (!dragging) {
-        // 移動
         x += vx;
         y += vy;
 
-        // 摩擦
         vx *= 0.98;
         vy *= 0.98;
 
-        // ─── 邊界碰撞（關鍵）───
+        // 邊界反彈
         if (x < 0) {
             x = 0;
             vx = Math.abs(vx) * 0.8;
@@ -143,9 +179,7 @@ function update() {
             vy = -Math.abs(vy) * 0.8;
         }
 
-        // 視覺旋轉
         person.style.transform = `rotate(${vx * 2}deg)`;
-
         person.style.left = x + "px";
         person.style.top = y + "px";
     }
