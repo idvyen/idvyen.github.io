@@ -7,8 +7,8 @@
     body {
         margin: 0;
         height: 100vh;
-        background: linear-gradient(#dff3ff, #ffffff);
         overflow: hidden;
+        background: linear-gradient(#dff3ff, #ffffff);
         cursor: none;
         font-family: "Segoe UI", sans-serif;
     }
@@ -21,8 +21,8 @@
 
     svg {
         position: absolute;
-        transition: transform 0.25s ease-out;
         pointer-events: none;
+        transition: transform 0.2s ease;
     }
 
     #hand {
@@ -32,8 +32,6 @@
 
     #person {
         width: 160px;
-        left: 60%;
-        bottom: 80px;
     }
 
     #tip {
@@ -42,7 +40,6 @@
         left: 50%;
         transform: translateX(-50%);
         opacity: 0.7;
-        pointer-events: none;
     }
 </style>
 </head>
@@ -51,7 +48,7 @@
 <div id="scene">
     <div id="tip">🖱️ 移動滑鼠 → 點擊打人</div>
 
-    <!-- ✋ 手 -->
+    <!-- 手 -->
     <svg id="hand" viewBox="0 0 200 200">
         <rect x="70" y="70" width="80" height="90" rx="35" fill="#ffddb8"/>
         <ellipse cx="55" cy="120" rx="22" ry="30" fill="#ffddb8"/>
@@ -61,7 +58,7 @@
         <rect x="145" y="40" width="18" height="45" rx="9" fill="#ffddb8"/>
     </svg>
 
-    <!-- 🙂 人 -->
+    <!-- 人 -->
     <svg id="person" viewBox="0 0 160 260">
         <circle cx="80" cy="45" r="35" fill="#ffe6c9"/>
         <circle cx="68" cy="42" r="4" fill="#333"/>
@@ -79,45 +76,52 @@
 const hand = document.getElementById("hand");
 const person = document.getElementById("person");
 
+// ✋ 手位置
 let handX = 0;
 let handY = 0;
 
+// 🧍 人的真實位置（left / top）
 let personX = window.innerWidth * 0.6;
-let personY = window.innerHeight - 260;
+let personY = window.innerHeight * 0.55;
 
-let rotation = 0;
+person.style.left = personX + "px";
+person.style.top = personY + "px";
 
-// ✋ 手跟著滑鼠
+// 手跟滑鼠
 document.addEventListener("mousemove", e => {
     handX = e.clientX - 40;
     handY = e.clientY - 40;
-    hand.style.transform = `translate(${handX}px, ${handY}px)`;
+    hand.style.left = handX + "px";
+    hand.style.top = handY + "px";
 });
 
-// 👋 點擊打
+// 點擊打
 document.addEventListener("mousedown", () => {
     // 手揮動
-    hand.style.transform += " rotate(-20deg)";
-    setTimeout(() => {
-        hand.style.transform = `translate(${handX}px, ${handY}px)`;
-    }, 100);
+    hand.style.transform = "rotate(-20deg)";
+    setTimeout(() => hand.style.transform = "none", 120);
 
-    // 打擊位移
-    personX += Math.random() * 120 + 80;
-    personY -= Math.random() * 60 + 30;
-    rotation += Math.random() * 360 + 180;
+    // 位移（累積）
+    personX += Math.random() * 120 + 60;
+    personY -= Math.random() * 60 + 20;
 
-    // 🚧 邊界限制（不飛出畫面）
-    const maxX = window.innerWidth - 180;
+    // 🚧 取得人實際大小
+    const rect = person.getBoundingClientRect();
+    const maxX = window.innerWidth - rect.width;
+    const maxY = window.innerHeight - rect.height;
     const minX = 0;
-    const maxY = window.innerHeight - 260;
-    const minY = 40;
+    const minY = 0;
 
-    personX = Math.min(maxX, Math.max(minX, personX));
-    personY = Math.min(maxY, Math.max(minY, personY));
+    // 🚧 嚴格限制
+    personX = Math.max(minX, Math.min(maxX, personX));
+    personY = Math.max(minY, Math.min(maxY, personY));
 
+    person.style.left = personX + "px";
+    person.style.top = personY + "px";
+
+    // 旋轉只是效果（不影響邊界）
     person.style.transform =
-        `translate(${personX}px, ${personY}px) rotate(${rotation}deg)`;
+        `rotate(${Math.random() * 40 - 20}deg)`;
 });
 </script>
 
