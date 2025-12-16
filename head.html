@@ -5,41 +5,94 @@
 <title>賞巴掌模擬器</title>
 <style>
     body {
-        background: #eef;
+        background: #e0f0ff;
         height: 100vh;
-        overflow: hidden;
+        margin: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
+        font-family: sans-serif;
     }
 
     #scene {
         position: relative;
-        width: 600px;
-        height: 300px;
+        width: 700px;
+        height: 350px;
     }
 
     #person {
         position: absolute;
-        left: 250px;
+        left: 350px;
         bottom: 50px;
-        width: 100px;
+        width: 120px;
         transition: transform 0.6s ease;
     }
 
     #hand {
         position: absolute;
-        left: 100px;
-        bottom: 80px;
-        width: 120px;
+        left: 120px;
+        bottom: 90px;
+        width: 140px;
         cursor: pointer;
         transition: transform 0.2s ease;
+    }
+
+    #tip {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 18px;
     }
 </style>
 </head>
 <body>
 
 <div id="scene">
+    <div id="tip">👉 點擊手掌</div>
+
+    <!-- 手的圖片（SVG 內嵌） -->
+    <img id="hand" src="data:image/svg+xml;base64,
+PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIHht
+bG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3QgeD0iNzAiIHk9IjUwIiB3aW
+R0aD0iNjAiIGhlaWdodD0iMTAwIiByeD0iMjAiIGZpbGw9IiNmZmRjYmEiLz48Y2lyY2xlIGN4
+PSIxMDAiIGN5PSI0MCIgcj0iMjAiIGZpbGw9IiNmZmRjYmEiLz48Y2lyY2xlIGN4PSI4MCIgY3k9
+IjMwIiByPSIxNSIgZmlsbD0iI2ZmZGNiYSIvPjxjaXJjbGUgY3g9IjEyMCIgY3k9IjMwIiByPSIx
+NSIgZmlsbD0iI2ZmZGNiYSIvPjwvc3ZnPg==" />
+
+    <!-- 人的圖片（SVG 內嵌） -->
+    <img id="person" src="data:image/svg+xml;base64,
+PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE1MCAyNTAiIHhtbG5z
+PSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNzUiIGN5PSI0MCIgcj0i
+MzAiIGZpbGw9IiNmZmU0YzQiLz48cmVjdCB4PSI1MCIgeT0iNzAiIHdpZHRoPSI1MCIgaGVpZ2h0
+PSI5MCIgZmlsbD0iI2NjZiIvPjxyZWN0IHg9IjMwIiB5PSIxNjAiIHdpZHRoPSI0MCIgaGVpZ2h0
+PSI3MCIgZmlsbD0iIzg4OCIvPjxyZWN0IHg9IjgwIiB5PSIxNjAiIHdpZHRoPSI0MCIgaGVpZ2h0
+PSI3MCIgZmlsbD0iIzg4OCIvPjwvc3ZnPg==" />
+</div>
+
+<script>
+const hand = document.getElementById("hand");
+const person = document.getElementById("person");
+
+hand.addEventListener("click", () => {
+    // 手揮出
+    hand.style.transform = "translateX(160px)";
+
+    // 人飛走
+    person.style.transform =
+        "translateX(400px) translateY(-200px) rotate(720deg)";
+
+    // 重置
+    setTimeout(() => {
+        hand.style.transform = "translateX(0)";
+        person.style.transform = "none";
+    }, 1000);
+});
+</script>
+
+</body>
+</html>
     <img id="hand" src="hand.png">
     <img id="person" src="person.png">
 </div>
