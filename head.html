@@ -18,6 +18,7 @@
         left: 50%;
         transform: translateX(-50%);
         opacity: 0.7;
+        pointer-events: none;
     }
 
     #person {
@@ -34,7 +35,7 @@
 </head>
 <body>
 
-<div id="tip">🖱️ 抓住小人拖 → 放開丟出去</div>
+<div id="tip">🖱️ 抓住小人拖動 → 放開丟出去</div>
 
 <!-- 🙂 小人 -->
 <svg id="person" viewBox="0 0 160 260">
@@ -52,27 +53,37 @@
 <script>
 const person = document.getElementById("person");
 
+// 📍 位置
 let x = window.innerWidth / 2;
 let y = window.innerHeight / 2;
+
+// 🧮 速度
 let vx = 0;
 let vy = 0;
 
+// 🖱️ 拖曳狀態
 let dragging = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
 
+// 初始位置
 person.style.left = x + "px";
 person.style.top = y + "px";
 
-// 🖱️ 按下抓住
+// =======================
+// 滑鼠事件
+// =======================
+
+// 按下 → 抓住
 person.addEventListener("mousedown", e => {
     dragging = true;
-    vx = vy = 0;
+    vx = 0;
+    vy = 0;
     lastMouseX = e.clientX;
     lastMouseY = e.clientY;
 });
 
-// 🖱️ 拖動
+// 拖動
 document.addEventListener("mousemove", e => {
     if (!dragging) return;
 
@@ -82,6 +93,7 @@ document.addEventListener("mousemove", e => {
     x += dx;
     y += dy;
 
+    // 記錄速度（放手時用）
     vx = dx;
     vy = dy;
 
@@ -92,36 +104,46 @@ document.addEventListener("mousemove", e => {
     person.style.top = y + "px";
 });
 
-// 🖱️ 放開 → 丟出去
+// 放開 → 丟出去
 document.addEventListener("mouseup", () => {
     dragging = false;
 });
 
-// 🔁 物理更新
+// =======================
+// 物理更新（不卡牆核心）
+// =======================
 function update() {
+    const w = person.offsetWidth;
+    const h = person.offsetHeight;
+
     if (!dragging) {
+        // 移動
         x += vx;
         y += vy;
 
-        // 摩擦力
+        // 摩擦
         vx *= 0.98;
         vy *= 0.98;
 
-        // 邊界反彈
-        const w = person.offsetWidth;
-        const h = person.offsetHeight;
-
-        if (x < 0 || x > window.innerWidth - w) {
-            vx *= -0.8;
-            x = Math.max(0, Math.min(window.innerWidth - w, x));
+        // ─── 邊界碰撞（關鍵）───
+        if (x < 0) {
+            x = 0;
+            vx = Math.abs(vx) * 0.8;
+        }
+        if (x > window.innerWidth - w) {
+            x = window.innerWidth - w;
+            vx = -Math.abs(vx) * 0.8;
+        }
+        if (y < 0) {
+            y = 0;
+            vy = Math.abs(vy) * 0.8;
+        }
+        if (y > window.innerHeight - h) {
+            y = window.innerHeight - h;
+            vy = -Math.abs(vy) * 0.8;
         }
 
-        if (y < 0 || y > window.innerHeight - h) {
-            vy *= -0.8;
-            y = Math.max(0, Math.min(window.innerHeight - h, y));
-        }
-
-        // 旋轉感
+        // 視覺旋轉
         person.style.transform = `rotate(${vx * 2}deg)`;
 
         person.style.left = x + "px";
@@ -134,8 +156,5 @@ function update() {
 update();
 </script>
 
-</body>
-</html>
-</html>
 </body>
 </html>
