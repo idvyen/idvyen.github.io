@@ -22,6 +22,11 @@
         align-items: center;
     }
 
+    #tip {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
     button {
         padding: 6px 14px;
         border-radius: 8px;
@@ -34,11 +39,6 @@
 
     button:hover {
         background: #357abd;
-    }
-
-    #tip {
-        opacity: 0.7;
-        pointer-events: none;
     }
 
     #person {
@@ -58,7 +58,6 @@
 <div id="ui">
     <div id="tip">🖱️ 抓住拖 → 放開丟</div>
     <button id="center">回到中央</button>
-    <button id="reset">重新開始</button>
 </div>
 
 <!-- 🙂 小人 -->
@@ -76,20 +75,22 @@
 
 <script>
 const person = document.getElementById("person");
-const resetBtn = document.getElementById("reset");
 const centerBtn = document.getElementById("center");
 
-// 位置與速度
+// 📍 位置
 let x, y;
-let vx = 0, vy = 0;
 
-// 拖曳
+// 🧮 速度
+let vx = 0;
+let vy = 0;
+
+// 🖱️ 拖曳狀態
 let dragging = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
 
 // =======================
-// 共用：移到中央
+// 🔄 回到中央（唯一控制）
 // =======================
 function moveToCenter() {
     x = window.innerWidth / 2 - person.offsetWidth / 2;
@@ -102,15 +103,9 @@ function moveToCenter() {
     person.style.transform = "none";
 }
 
-// 🔄 重新開始（目前等同於回中央＋清空）
-function resetPerson() {
-    moveToCenter();
-}
-
 centerBtn.addEventListener("click", moveToCenter);
-resetBtn.addEventListener("click", resetPerson);
 
-// 初始
+// 初始放中央
 moveToCenter();
 
 // =======================
@@ -148,7 +143,7 @@ document.addEventListener("mouseup", () => {
 });
 
 // =======================
-// 物理更新
+// 物理更新（不卡牆）
 // =======================
 function update() {
     const w = person.offsetWidth;
@@ -158,6 +153,7 @@ function update() {
         x += vx;
         y += vy;
 
+        // 摩擦
         vx *= 0.98;
         vy *= 0.98;
 
