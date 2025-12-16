@@ -188,3 +188,189 @@ update();
 
 </body>
 </html>
+🎮 現在這個版本你有：
+✔ 抓起來拖
+✔ 放開丟出去
+✔ 撞牆反彈
+✔ 一鍵回到中央（真的回中間）
+✔ ❌ 沒有重新開始（已刪）
+✔ 結構乾淨、邏輯單一
+
+👉 這份就是「最穩定、最好交作業」的版本
+
+如果你還想加（都很簡單）：
+
+⌨️ 按 C 回到中央
+
+🎬 回中央用動畫飛回
+
+🌍 加重力
+
+🔊 音效
+
+直接說要哪個，我幫你接著加 💪
+
+
+
+
+
+
+
+你說：
+我要一個用滑鼠托小人，把小人丟出去，撞到牆壁反彈的程式
+
+
+ChatGPT 說：
+好 👍
+下面這份就是你要的最基本、穩定、不會卡牆的版本：
+
+🖱️ 用滑鼠拖小人
+✋ 放開 → 小人被丟出去
+🧱 撞到牆壁會反彈
+🔁 可以一直拖、一直丟
+
+不多加按鈕、不加多餘功能，專心把核心做好。
+
+✅ 完整可用程式（直接用）
+👉 整份存成 throw_person.html，用瀏覽器打開
+
+html
+複製程式碼
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>丟小人</title>
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: #eef6ff;
+        user-select: none;
+    }
+
+    #person {
+        position: absolute;
+        width: 140px;
+        cursor: grab;
+    }
+
+    #person:active {
+        cursor: grabbing;
+    }
+</style>
+</head>
+<body>
+
+<!-- 小人 -->
+<svg id="person" viewBox="0 0 160 260">
+    <circle cx="80" cy="45" r="35" fill="#ffe6c9"/>
+    <circle cx="68" cy="42" r="4" fill="#333"/>
+    <circle cx="92" cy="42" r="4" fill="#333"/>
+    <path d="M65 58 Q80 68 95 58" stroke="#333" stroke-width="3" fill="none"/>
+    <rect x="50" y="85" width="60" height="90" rx="20" fill="#6fa8dc"/>
+    <rect x="25" y="95" width="25" height="70" rx="12" fill="#ffe6c9"/>
+    <rect x="110" y="95" width="25" height="70" rx="12" fill="#ffe6c9"/>
+    <rect x="55" y="175" width="20" height="70" rx="10" fill="#555"/>
+    <rect x="85" y="175" width="20" height="70" rx="10" fill="#555"/>
+</svg>
+
+<script>
+const person = document.getElementById("person");
+
+// 位置
+let x = window.innerWidth / 2;
+let y = window.innerHeight / 2;
+
+// 速度
+let vx = 0;
+let vy = 0;
+
+// 拖曳狀態
+let dragging = false;
+let lastX = 0;
+let lastY = 0;
+
+// 初始位置
+person.style.left = x + "px";
+person.style.top = y + "px";
+
+// 按下 → 抓住
+person.addEventListener("mousedown", e => {
+    dragging = true;
+    vx = 0;
+    vy = 0;
+    lastX = e.clientX;
+    lastY = e.clientY;
+});
+
+// 拖動
+document.addEventListener("mousemove", e => {
+    if (!dragging) return;
+
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+
+    x += dx;
+    y += dy;
+
+    // 記錄速度（放開時用）
+    vx = dx;
+    vy = dy;
+
+    lastX = e.clientX;
+    lastY = e.clientY;
+
+    person.style.left = x + "px";
+    person.style.top = y + "px";
+});
+
+// 放開 → 丟出去
+document.addEventListener("mouseup", () => {
+    dragging = false;
+});
+
+// 更新（物理）
+function update() {
+    const w = person.offsetWidth;
+    const h = person.offsetHeight;
+
+    if (!dragging) {
+        // 移動
+        x += vx;
+        y += vy;
+
+        // 摩擦
+        vx *= 0.98;
+        vy *= 0.98;
+
+        // 撞牆反彈（不會卡）
+        if (x < 0) {
+            x = 0;
+            vx = Math.abs(vx);
+        }
+        if (x > window.innerWidth - w) {
+            x = window.innerWidth - w;
+            vx = -Math.abs(vx);
+        }
+        if (y < 0) {
+            y = 0;
+            vy = Math.abs(vy);
+        }
+        if (y > window.innerHeight - h) {
+            y = window.innerHeight - h;
+            vy = -Math.abs(vy);
+        }
+
+        person.style.left = x + "px";
+        person.style.top = y + "px";
+    }
+
+    requestAnimationFrame(update);
+}
+
+update();
+</script>
+
+</body>
+</html>
