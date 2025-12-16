@@ -21,21 +21,23 @@
         height: 350px;
     }
 
-    #person {
+    svg {
         position: absolute;
-        left: 350px;
-        bottom: 50px;
-        width: 120px;
         transition: transform 0.6s ease;
     }
 
     #hand {
-        position: absolute;
-        left: 120px;
+        left: 100px;
         bottom: 90px;
-        width: 140px;
+        width: 160px;
         cursor: pointer;
         transition: transform 0.2s ease;
+    }
+
+    #person {
+        left: 350px;
+        bottom: 50px;
+        width: 140px;
     }
 
     #tip {
@@ -52,23 +54,21 @@
 <div id="scene">
     <div id="tip">👉 點擊手掌</div>
 
-    <!-- 手的圖片（SVG 內嵌） -->
-    <img id="hand" src="data:image/svg+xml;base64,
-PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIHht
-bG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3QgeD0iNzAiIHk9IjUwIiB3aW
-R0aD0iNjAiIGhlaWdodD0iMTAwIiByeD0iMjAiIGZpbGw9IiNmZmRjYmEiLz48Y2lyY2xlIGN4
-PSIxMDAiIGN5PSI0MCIgcj0iMjAiIGZpbGw9IiNmZmRjYmEiLz48Y2lyY2xlIGN4PSI4MCIgY3k9
-IjMwIiByPSIxNSIgZmlsbD0iI2ZmZGNiYSIvPjxjaXJjbGUgY3g9IjEyMCIgY3k9IjMwIiByPSIx
-NSIgZmlsbD0iI2ZmZGNiYSIvPjwvc3ZnPg==" />
+    <!-- 手（直接畫出來） -->
+    <svg id="hand" viewBox="0 0 200 200">
+        <rect x="80" y="60" width="60" height="100" rx="20" fill="#ffdcb8"/>
+        <circle cx="110" cy="40" r="20" fill="#ffdcb8"/>
+        <circle cx="90" cy="30" r="15" fill="#ffdcb8"/>
+        <circle cx="130" cy="30" r="15" fill="#ffdcb8"/>
+    </svg>
 
-    <!-- 人的圖片（SVG 內嵌） -->
-    <img id="person" src="data:image/svg+xml;base64,
-PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE1MCAyNTAiIHhtbG5z
-PSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNzUiIGN5PSI0MCIgcj0i
-MzAiIGZpbGw9IiNmZmU0YzQiLz48cmVjdCB4PSI1MCIgeT0iNzAiIHdpZHRoPSI1MCIgaGVpZ2h0
-PSI5MCIgZmlsbD0iI2NjZiIvPjxyZWN0IHg9IjMwIiB5PSIxNjAiIHdpZHRoPSI0MCIgaGVpZ2h0
-PSI3MCIgZmlsbD0iIzg4OCIvPjxyZWN0IHg9IjgwIiB5PSIxNjAiIHdpZHRoPSI0MCIgaGVpZ2h0
-PSI3MCIgZmlsbD0iIzg4OCIvPjwvc3ZnPg==" />
+    <!-- 人（直接畫出來） -->
+    <svg id="person" viewBox="0 0 150 250">
+        <circle cx="75" cy="40" r="30" fill="#ffe4c4"/>
+        <rect x="50" y="70" width="50" height="90" fill="#88c"/>
+        <rect x="30" y="160" width="40" height="70" fill="#555"/>
+        <rect x="80" y="160" width="40" height="70" fill="#555"/>
+    </svg>
 </div>
 
 <script>
@@ -77,39 +77,13 @@ const person = document.getElementById("person");
 
 hand.addEventListener("click", () => {
     // 手揮出
-    hand.style.transform = "translateX(160px)";
+    hand.style.transform = "translateX(180px)";
 
     // 人飛走
     person.style.transform =
         "translateX(400px) translateY(-200px) rotate(720deg)";
 
     // 重置
-    setTimeout(() => {
-        hand.style.transform = "translateX(0)";
-        person.style.transform = "none";
-    }, 1000);
-});
-</script>
-
-</body>
-</html>
-    <img id="hand" src="hand.png">
-    <img id="person" src="person.png">
-</div>
-
-<script>
-const hand = document.getElementById("hand");
-const person = document.getElementById("person");
-
-hand.addEventListener("click", () => {
-    // 手揮出去
-    hand.style.transform = "translateX(120px)";
-
-    // 人飛走
-    person.style.transform =
-        "translateX(300px) translateY(-150px) rotate(720deg)";
-
-    // 重置（方便再玩）
     setTimeout(() => {
         hand.style.transform = "translateX(0)";
         person.style.transform = "none";
