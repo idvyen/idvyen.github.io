@@ -47,7 +47,7 @@
 <body>
 
 <div id="scene">
-    <div id="tip">🖱️ 移動滑鼠 → 點擊打人</div>
+    <div id="tip">🖱️ 靠近人 → 點擊打</div>
 
     <!-- ✋ 手 -->
     <svg id="hand" viewBox="0 0 200 200">
@@ -77,18 +77,14 @@
 const hand = document.getElementById("hand");
 const person = document.getElementById("person");
 
-// ✋ 手位置
-let handX = 0;
-let handY = 0;
-
-// 🧍 人位置（真實 left / top）
+let handX = 0, handY = 0;
 let personX = window.innerWidth * 0.6;
 let personY = window.innerHeight * 0.55;
 
 person.style.left = personX + "px";
 person.style.top = personY + "px";
 
-// 手跟滑鼠
+// ✋ 手跟滑鼠
 document.addEventListener("mousemove", e => {
     handX = e.clientX - 40;
     handY = e.clientY - 40;
@@ -96,51 +92,61 @@ document.addEventListener("mousemove", e => {
     hand.style.top = handY + "px";
 });
 
-// 點擊打
+// 👋 點擊打
 document.addEventListener("mousedown", () => {
+
+    const handRect = hand.getBoundingClientRect();
+    const personRect = person.getBoundingClientRect();
+
+    const handCX = handRect.left + handRect.width / 2;
+    const handCY = handRect.top + handRect.height / 2;
+    const personCX = personRect.left + personRect.width / 2;
+    const personCY = personRect.top + personRect.height / 2;
+
+    // 📏 距離判定（一定要靠近）
+    const distance = Math.hypot(personCX - handCX, personCY - handCY);
+    const HIT_DISTANCE = 140;
+
+    if (distance > HIT_DISTANCE) return; // 沒打到
 
     // ✋ 手揮動
     hand.style.transform = "rotate(-20deg)";
     setTimeout(() => hand.style.transform = "none", 120);
 
-    // 📐 計算「手 → 人」方向
-    const handRect = hand.getBoundingClientRect();
-    const personRect = person.getBoundingClientRect();
+    // 👉 反方向
+    let dx = personCX - handCX;
+    let dy = personCY - handCY;
+    const len = Math.hypot(dx, dy) || 1;
+    dx /= len;
+    dy /= len;
 
-    const handCenterX = handRect.left + handRect.width / 2;
-    const handCenterY = handRect.top + handRect.height / 2;
-
-    const personCenterX = personRect.left + personRect.width / 2;
-    const personCenterY = personRect.top + personRect.height / 2;
-
-    let dx = personCenterX - handCenterX;
-    let dy = personCenterY - handCenterY;
-
-    // 正規化向量（變成方向）
-    const length = Math.hypot(dx, dy) || 1;
-    dx /= length;
-    dy /= length;
-
-    // 🚀 往「手的反方向」飛（力度）
     const force = Math.random() * 300 + 200;
     personX += dx * force;
     personY += dy * force;
 
-    // 🚧 邊界限制（可貼邊但不消失）
-    const padding = 30;
+    // 🚧 邊界反彈
+    const padding = 20;
     const maxX = window.innerWidth - personRect.width + padding;
     const maxY = window.innerHeight - personRect.height + padding;
     const minX = -padding;
     const minY = -padding;
 
+    if (personX < minX || personX > maxX) {
+        dx *= -1;
+        personX += dx * 80; // 彈回來
+    }
+    if (personY < minY || personY > maxY) {
+        dy *= -1;
+        personY += dy * 80;
+    }
+
+    // 最終限制
     personX = Math.max(minX, Math.min(maxX, personX));
     personY = Math.max(minY, Math.min(maxY, personY));
 
-    // 套用位置
     person.style.left = personX + "px";
     person.style.top = personY + "px";
 
-    // 旋轉效果
     person.style.transform =
         `rotate(${Math.random() * 40 - 20}deg)`;
 });
