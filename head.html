@@ -22,7 +22,7 @@
     svg {
         position: absolute;
         pointer-events: none;
-        transition: transform 0.2s ease;
+        transition: transform 0.25s ease, left 0.25s ease, top 0.25s ease;
     }
 
     #hand {
@@ -47,7 +47,7 @@
 <body>
 
 <div id="scene">
-    <div id="tip">🖱️ 靠近人 → 點擊打</div>
+    <div id="tip">🖱️ 靠近人 → 點擊打（飛出後會重來）</div>
 
     <!-- ✋ 手 -->
     <svg id="hand" viewBox="0 0 200 200">
@@ -78,13 +78,20 @@ const hand = document.getElementById("hand");
 const person = document.getElementById("person");
 
 let handX = 0, handY = 0;
-let personX = window.innerWidth * 0.6;
-let personY = window.innerHeight * 0.55;
 
-person.style.left = personX + "px";
-person.style.top = personY + "px";
+// 🧍 人的初始位置
+function resetPerson() {
+    personX = window.innerWidth * 0.6;
+    personY = window.innerHeight * 0.55;
+    person.style.left = personX + "px";
+    person.style.top = personY + "px";
+    person.style.transform = "none";
+}
 
-// ✋ 手跟滑鼠
+let personX, personY;
+resetPerson();
+
+// ✋ 手跟著滑鼠
 document.addEventListener("mousemove", e => {
     handX = e.clientX - 40;
     handY = e.clientY - 40;
@@ -103,54 +110,36 @@ document.addEventListener("mousedown", () => {
     const personCX = personRect.left + personRect.width / 2;
     const personCY = personRect.top + personRect.height / 2;
 
-    // 📏 距離判定（一定要靠近）
+    // 📏 距離判定
     const distance = Math.hypot(personCX - handCX, personCY - handCY);
-    const HIT_DISTANCE = 140;
-
-    if (distance > HIT_DISTANCE) return; // 沒打到
+    if (distance > 140) return;
 
     // ✋ 手揮動
     hand.style.transform = "rotate(-20deg)";
     setTimeout(() => hand.style.transform = "none", 120);
 
-    // 👉 反方向
+    // 👉 方向（往手的反方向）
     let dx = personCX - handCX;
     let dy = personCY - handCY;
     const len = Math.hypot(dx, dy) || 1;
     dx /= len;
     dy /= len;
 
-    const force = Math.random() * 300 + 200;
-    personX += dx * force;
-    personY += dy * force;
-
-    // 🚧 邊界反彈
-    const padding = 20;
-    const maxX = window.innerWidth - personRect.width + padding;
-    const maxY = window.innerHeight - personRect.height + padding;
-    const minX = -padding;
-    const minY = -padding;
-
-    if (personX < minX || personX > maxX) {
-        dx *= -1;
-        personX += dx * 80; // 彈回來
-    }
-    if (personY < minY || personY > maxY) {
-        dy *= -1;
-        personY += dy * 80;
-    }
-
-    // 最終限制
-    personX = Math.max(minX, Math.min(maxX, personX));
-    personY = Math.max(minY, Math.min(maxY, personY));
+    // 🚀 直接飛出畫面
+    const flyDistance = Math.max(window.innerWidth, window.innerHeight) * 1.2;
+    personX += dx * flyDistance;
+    personY += dy * flyDistance;
 
     person.style.left = personX + "px";
     person.style.top = personY + "px";
+    person.style.transform = `rotate(${Math.random() * 720 + 360}deg)`;
 
-    person.style.transform =
-        `rotate(${Math.random() * 40 - 20}deg)`;
+    // 🔄 飛出去後重生
+    setTimeout(resetPerson, 500);
 });
 </script>
 
+</body>
+</html>
 </body>
 </html>
