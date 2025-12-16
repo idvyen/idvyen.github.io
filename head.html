@@ -81,7 +81,7 @@ const person = document.getElementById("person");
 let handX = 0;
 let handY = 0;
 
-// 🧍 人的真實位置（left / top）
+// 🧍 人位置（真實 left / top）
 let personX = window.innerWidth * 0.6;
 let personY = window.innerHeight * 0.55;
 
@@ -98,20 +98,38 @@ document.addEventListener("mousemove", e => {
 
 // 點擊打
 document.addEventListener("mousedown", () => {
+
     // ✋ 手揮動
     hand.style.transform = "rotate(-20deg)";
     setTimeout(() => hand.style.transform = "none", 120);
 
-    // 🚀 人飛很遠（爽感來源）
-    personX += Math.random() * 300 + 200;
-    personY -= Math.random() * 180 + 80;
+    // 📐 計算「手 → 人」方向
+    const handRect = hand.getBoundingClientRect();
+    const personRect = person.getBoundingClientRect();
 
-    // 🚧 邊界限制（但留邊距，讓看起來快飛出去）
-    const rect = person.getBoundingClientRect();
-    const padding = 30; // ⭐ 關鍵：邊界鬆緊度
+    const handCenterX = handRect.left + handRect.width / 2;
+    const handCenterY = handRect.top + handRect.height / 2;
 
-    const maxX = window.innerWidth - rect.width + padding;
-    const maxY = window.innerHeight - rect.height + padding;
+    const personCenterX = personRect.left + personRect.width / 2;
+    const personCenterY = personRect.top + personRect.height / 2;
+
+    let dx = personCenterX - handCenterX;
+    let dy = personCenterY - handCenterY;
+
+    // 正規化向量（變成方向）
+    const length = Math.hypot(dx, dy) || 1;
+    dx /= length;
+    dy /= length;
+
+    // 🚀 往「手的反方向」飛（力度）
+    const force = Math.random() * 300 + 200;
+    personX += dx * force;
+    personY += dy * force;
+
+    // 🚧 邊界限制（可貼邊但不消失）
+    const padding = 30;
+    const maxX = window.innerWidth - personRect.width + padding;
+    const maxY = window.innerHeight - personRect.height + padding;
     const minX = -padding;
     const minY = -padding;
 
@@ -122,7 +140,7 @@ document.addEventListener("mousedown", () => {
     person.style.left = personX + "px";
     person.style.top = personY + "px";
 
-    // 旋轉只是視覺效果
+    // 旋轉效果
     person.style.transform =
         `rotate(${Math.random() * 40 - 20}deg)`;
 });
