@@ -1,11 +1,68 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset = "utf-8">
-    <title>解壓遊戲</title>
-    <link rel="icon" href="hand.jpg">
-  </head>
-  <body>
-      hello world
-  </body>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>賞巴掌模擬器</title>
+<style>
+    body {
+        background: #eef;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #scene {
+        position: relative;
+        width: 600px;
+        height: 300px;
+    }
+
+    #person {
+        position: absolute;
+        left: 250px;
+        bottom: 50px;
+        width: 100px;
+        transition: transform 0.6s ease;
+    }
+
+    #hand {
+        position: absolute;
+        left: 100px;
+        bottom: 80px;
+        width: 120px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+</style>
+</head>
+<body>
+
+<div id="scene">
+    <img id="hand" src="hand.png">
+    <img id="person" src="person.png">
+</div>
+
+<script>
+const hand = document.getElementById("hand");
+const person = document.getElementById("person");
+
+hand.addEventListener("click", () => {
+    // 手揮出去
+    hand.style.transform = "translateX(120px)";
+
+    // 人飛走
+    person.style.transform =
+        "translateX(300px) translateY(-150px) rotate(720deg)";
+
+    // 重置（方便再玩）
+    setTimeout(() => {
+        hand.style.transform = "translateX(0)";
+        person.style.transform = "none";
+    }, 1000);
+});
+</script>
+
+</body>
 </html>
