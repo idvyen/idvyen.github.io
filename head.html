@@ -2,135 +2,144 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>丟小人</title>
+<title>把小人丟來丟去</title>
 <style>
-    body {
-        margin: 0;
-        overflow: hidden;
-        background: #eef6ff;
-        user-select: none;
-    }
-
-    #person {
-        position: absolute;
-        width: 120px;
-        cursor: grab;
-    }
-
-    #person:active {
-        cursor: grabbing;
-    }
+  body {
+    text-align: center;
+    background: #f0f0f0;
+    font-family: Arial;
+  }
+  canvas {
+    background: white;
+    border: 2px solid black;
+    cursor: grab;
+  }
+  button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    font-size: 16px;
+  }
 </style>
 </head>
 <body>
 
-<!-- 小人 -->
-<svg id="person" viewBox="0 0 160 260">
-    <circle cx="80" cy="45" r="35" fill="#ffe6c9"/>
-    <circle cx="68" cy="42" r="4"/>
-    <circle cx="92" cy="42" r="4"/>
-    <path d="M65 58 Q80 68 95 58" stroke="#000" stroke-width="3" fill="none"/>
-    <rect x="50" y="85" width="60" height="90" rx="20" fill="#6fa8dc"/>
-</svg>
+<h2>🧍‍♂️ 把小人丟來丟去</h2>
+<canvas id="game" width="600" height="400"></canvas><br>
+<button onclick="reset()">回到中央</button>
 
 <script>
-const person = document.getElementById("person");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-// 位置
-let x = window.innerWidth / 2;
-let y = window.innerHeight / 2;
+let guy = {
+  x: 300,
+  y: 200,
+  r: 20,
+  vx: 0,
+  vy: 0,
+  dragging: false
+};
 
-// 速度
-let vx = 0;
-let vy = 0;
+const gravity = 0.5;
+const bounce = 0.8;
 
-// 拖曳
-let dragging = false;
-let lastX = 0;
-let lastY = 0;
+let lastMouse = { x: 0, y: 0 };
 
-// 初始位置
-person.style.left = x + "px";
-person.style.top = y + "px";
+canvas.addEventListener("mousedown", e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
 
-// 按下抓住
-person.addEventListener("mousedown", e => {
-    dragging = true;
-    vx = 0;
-    vy = 0;
-    lastX = e.clientX;
-    lastY = e.clientY;
+  const dx = mx - guy.x;
+  const dy = my - guy.y;
+
+  if (Math.sqrt(dx * dx + dy * dy) < guy.r) {
+    guy.dragging = true;
+    guy.vx = 0;
+    guy.vy = 0;
+    lastMouse.x = mx;
+    lastMouse.y = my;
+  }
 });
 
-// 拖動
-document.addEventListener("mousemove", e => {
-    if (!dragging) return;
+canvas.addEventListener("mousemove", e => {
+  if (!guy.dragging) return;
 
-    const dx = e.clientX - lastX;
-    const dy = e.clientY - lastY;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
 
-    x += dx;
-    y += dy;
+  guy.vx = mx - lastMouse.x;
+  guy.vy = my - lastMouse.y;
 
-    // 記錄丟出的速度
-    vx = dx;
-    vy = dy;
+  guy.x = mx;
+  guy.y = my;
 
-    lastX = e.clientX;
-    lastY = e.clientY;
-
-    person.style.left = x + "px";
-    person.style.top = y + "px";
+  lastMouse.x = mx;
+  lastMouse.y = my;
 });
 
-// 放開 → 丟出去
-document.addEventListener("mouseup", () => {
-    dragging = false;
+canvas.addEventListener("mouseup", () => {
+  guy.dragging = false;
 });
 
-// 物理更新
-function update() {
-    const w = person.offsetWidth;
-    const h = person.offsetHeight;
-
-    if (!dragging) {
-        x += vx;
-        y += vy;
-
-        // 摩擦
-        vx *= 0.98;
-        vy *= 0.98;
-
-        // 撞牆反彈（不會卡牆）
-        if (x < 0) {
-            x = 0;
-            vx = Math.abs(vx);
-        }
-        if (x > window.innerWidth - w) {
-            x = window.innerWidth - w;
-            vx = -Math.abs(vx);
-        }
-        if (y < 0) {
-            y = 0;
-            vy = Math.abs(vy);
-        }
-        if (y > window.innerHeight - h) {
-            y = window.innerHeight - h;
-            vy = -Math.abs(vy);
-        }
-
-        person.style.left = x + "px";
-        person.style.top = y + "px";
-    }
-
-    requestAnimationFrame(update);
+function reset() {
+  guy.x = 300;
+  guy.y = 200;
+  guy.vx = 0;
+  guy.vy = 0;
 }
 
-update();
-</script>
+function update() {
+  if (!guy.dragging) {
+    guy.vy += gravity;
+    guy.x += guy.vx;
+    guy.y += guy.vy;
 
-</body>
-</html>
+    // 牆壁反彈
+    if (guy.x < guy.r) {
+      guy.x = guy.r;
+      guy.vx *= -bounce;
+    }
+    if (guy.x > canvas.width - guy.r) {
+      guy.x = canvas.width - guy.r;
+      guy.vx *= -bounce;
+    }
+    if (guy.y < guy.r) {
+      guy.y = guy.r;
+      guy.vy *= -bounce;
+    }
+    if (guy.y > canvas.height - guy.r) {
+      guy.y = canvas.height - guy.r;
+      guy.vy *= -bounce;
+    }
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // 小人（圓形）
+  ctx.beginPath();
+  ctx.arc(guy.x, guy.y, guy.r, 0, Math.PI * 2);
+  ctx.fillStyle = "orange";
+  ctx.fill();
+  ctx.stroke();
+
+  // 臉
+  ctx.fillStyle = "black";
+  ctx.fillRect(guy.x - 5, guy.y - 5, 3, 3);
+  ctx.fillRect(guy.x + 2, guy.y - 5, 3, 3);
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
 
 </body>
 </html>
