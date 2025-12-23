@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>把小人丟來丟去</title>
+<title>把小人丟來丟去（人形）</title>
 <style>
   body {
     text-align: center;
@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<h2>🧍‍♂️ 把小人丟來丟去</h2>
+<h2>🧍‍♂️ 把小人丟來丟去（人形＋四肢動）</h2>
 <canvas id="game" width="600" height="400"></canvas><br>
 <button onclick="reset()">回到中央</button>
 
@@ -34,10 +34,10 @@ const ctx = canvas.getContext("2d");
 let guy = {
   x: 300,
   y: 200,
-  r: 20,
   vx: 0,
   vy: 0,
-  dragging: false
+  dragging: false,
+  walkTime: 0
 };
 
 const gravity = 0.5;
@@ -45,15 +45,13 @@ const bounce = 0.8;
 
 let lastMouse = { x: 0, y: 0 };
 
+// 滑鼠按下（抓人）
 canvas.addEventListener("mousedown", e => {
   const rect = canvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
 
-  const dx = mx - guy.x;
-  const dy = my - guy.y;
-
-  if (Math.sqrt(dx * dx + dy * dy) < guy.r) {
+  if (Math.abs(mx - guy.x) < 30 && Math.abs(my - guy.y) < 60) {
     guy.dragging = true;
     guy.vx = 0;
     guy.vy = 0;
@@ -62,6 +60,7 @@ canvas.addEventListener("mousedown", e => {
   }
 });
 
+// 拖曳
 canvas.addEventListener("mousemove", e => {
   if (!guy.dragging) return;
 
@@ -79,17 +78,20 @@ canvas.addEventListener("mousemove", e => {
   lastMouse.y = my;
 });
 
+// 放手丟出去
 canvas.addEventListener("mouseup", () => {
   guy.dragging = false;
 });
 
+// 回到中央
 function reset() {
-  guy.x = 300;
-  guy.y = 200;
+  guy.x = canvas.width / 2;
+  guy.y = canvas.height / 2;
   guy.vx = 0;
   guy.vy = 0;
 }
 
+// 更新物理
 function update() {
   if (!guy.dragging) {
     guy.vy += gravity;
@@ -97,41 +99,83 @@ function update() {
     guy.y += guy.vy;
 
     // 牆壁反彈
-    if (guy.x < guy.r) {
-      guy.x = guy.r;
+    if (guy.x < 20) {
+      guy.x = 20;
       guy.vx *= -bounce;
     }
-    if (guy.x > canvas.width - guy.r) {
-      guy.x = canvas.width - guy.r;
+    if (guy.x > canvas.width - 20) {
+      guy.x = canvas.width - 20;
       guy.vx *= -bounce;
     }
-    if (guy.y < guy.r) {
-      guy.y = guy.r;
+    if (guy.y < 20) {
+      guy.y = 20;
       guy.vy *= -bounce;
     }
-    if (guy.y > canvas.height - guy.r) {
-      guy.y = canvas.height - guy.r;
+    if (guy.y > canvas.height - 20) {
+      guy.y = canvas.height - 20;
       guy.vy *= -bounce;
     }
   }
 }
 
+// 繪製人形（四肢會動）
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 小人（圓形）
+  const speed = Math.sqrt(guy.vx * guy.vx + guy.vy * guy.vy);
+  guy.walkTime += speed * 0.05;
+
+  const swing = Math.sin(guy.walkTime) * Math.min(speed, 10) * 0.6;
+
+  const x = guy.x;
+  const y = guy.y;
+
+  const headR = 10;
+  const bodyLen = 28;
+  const armLen = 22;
+  const legLen = 26;
+
+  ctx.lineWidth = 4;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "black";
+
+  // 頭
   ctx.beginPath();
-  ctx.arc(guy.x, guy.y, guy.r, 0, Math.PI * 2);
-  ctx.fillStyle = "orange";
-  ctx.fill();
+  ctx.arc(x, y - bodyLen - headR, headR, 0, Math.PI * 2);
   ctx.stroke();
 
-  // 臉
-  ctx.fillStyle = "black";
-  ctx.fillRect(guy.x - 5, guy.y - 5, 3, 3);
-  ctx.fillRect(guy.x + 2, guy.y - 5, 3, 3);
+  // 身體
+  ctx.beginPath();
+  ctx.moveTo(x, y - bodyLen);
+  ctx.lineTo(x, y);
+  ctx.stroke();
+
+  // 左手
+  ctx.beginPath();
+  ctx.moveTo(x, y - bodyLen + 5);
+  ctx.lineTo(x - armLen, y - bodyLen + 5 + swing);
+  ctx.stroke();
+
+  // 右手
+  ctx.beginPath();
+  ctx.moveTo(x, y - bodyLen + 5);
+  ctx.lineTo(x + armLen, y - bodyLen + 5 - swing);
+  ctx.stroke();
+
+  // 左腳
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - 12, y + legLen - swing);
+  ctx.stroke();
+
+  // 右腳
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + 12, y + legLen + swing);
+  ctx.stroke();
 }
 
+// 遊戲主迴圈
 function loop() {
   update();
   draw();
@@ -141,5 +185,7 @@ function loop() {
 loop();
 </script>
 
+</body>
+</html>
 </body>
 </html>
